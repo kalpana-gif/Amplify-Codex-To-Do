@@ -2,25 +2,76 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #111827;
+  --surface: rgba(255, 255, 255, 0.86);
+  --surface-strong: rgba(255, 255, 255, 0.96);
+  --stroke: rgba(15, 23, 42, 0.09);
+  --accent: #334155;
+  --accent-soft: #e2e8f0;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-space-grotesk);
+  --font-mono: var(--font-ibm-plex-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-space-grotesk), "Avenir Next", "Segoe UI", sans-serif;
+}
+
+::selection {
+  background: #cbd5e1;
+  color: #0f172a;
+}
+
+.app-shell {
+  background:
+    radial-gradient(circle at 16% 14%, #f8fafc 0%, transparent 34%),
+    radial-gradient(circle at 82% 8%, #eef2ff 0%, transparent 30%),
+    radial-gradient(circle at 80% 84%, #f1f5f9 0%, transparent 34%),
+    linear-gradient(135deg, #ffffff 0%, #f8fafc 44%, #f1f5f9 100%);
+}
+
+.glass-panel {
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  backdrop-filter: blur(8px);
+}
+
+.glass-panel-strong {
+  background: var(--surface-strong);
+  border: 1px solid var(--stroke);
+  backdrop-filter: blur(8px);
+}
+
+.soft-focus {
+  box-shadow:
+    0 24px 40px -30px rgba(15, 23, 42, 0.45),
+    0 10px 18px -16px rgba(15, 23, 42, 0.4);
+}
+
+.dash-grid {
+  background-image:
+    linear-gradient(to right, rgba(148, 163, 184, 0.13) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.13) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+.fade-in-up {
+  animation: fade-in-up 380ms ease-out;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

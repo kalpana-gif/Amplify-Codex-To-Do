@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "sync:amplify": "cp ../amplify_outputs.json ./amplify_outputs.json"
   },
   "dependencies": {
+    "aws-amplify": "^6.16.3",
     "next": "16.2.1",
     "react": "19.2.4",
     "react-dom": "19.2.4"
