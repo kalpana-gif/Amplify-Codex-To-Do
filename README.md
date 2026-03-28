@@ -1,33 +1,43 @@
-# Amplify Todo (Next.js)
+# Amplify Todo (Next.js 16)
 
-This app is a Todo CRUD frontend built with Next.js and wired to an AWS Amplify Gen 2 backend.
+Todo board for engineering delivery workflows using Next.js + Amplify Gen 2.
+
+## Stack
+
+- Next.js 16 + React 19
+- Amplify Data (AppSync GraphQL)
+- Amplify-provisioned API Gateway + Lambda (`restTodo`) for REST paths
 
 ## Prerequisites
 
 - Node.js 20+
 - AWS credentials configured locally
-- Amplify backend files in the parent folder: `../amplify`
+- Backend definitions available (see notes below)
 
-## 1) Start Amplify Backend Sandbox
+## Backend Location Notes
 
-Run this from the parent project directory:
+- Sandbox deployment is typically run from the parent folder backend: `../amplify`.
+- This app also contains `./amplify` type definitions used by imports like `amplify/data/resource.ts`.
+- Keep both backend definition folders aligned if you edit schema or function contracts.
+
+## Local Run
+
+1. From parent folder, deploy/update backend sandbox:
 
 ```bash
 cd ..
 npx ampx sandbox
 ```
 
-This generates `../amplify_outputs.json`.
+This writes `../amplify_outputs.json`.
 
-## 2) Sync Backend Outputs Into Next App
-
-From this folder (`next-amplify-crud`):
+2. From `next-amplify-crud`, sync outputs:
 
 ```bash
 npm run sync:amplify
 ```
 
-## 3) Run The App
+3. Install and run frontend:
 
 ```bash
 npm install
@@ -36,30 +46,28 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-## Features
+## Current API Behavior
 
-- Create Todo
-- Read/list Todos
-- Toggle completion
-- Delete Todo
-- Edit Todo via Amplify REST API (`PATCH /todos/{id}` on API Gateway)
+- List todos: GraphQL `Todo.list()`
+- Create todo: REST `POST /todos` (fallback to GraphQL create if REST endpoint is unavailable)
+- Edit/toggle/status note: REST `PATCH /todos/:id`
+- REST-unavailable fallback for updates: Next route handler `PATCH /api/todos/:id`
+- Delete todos: GraphQL `Todo.delete()`
+- Bulk clear completed: GraphQL delete per completed todo
 
-## Amplify REST + GraphQL (Demo)
+## Current UI Capabilities
 
-This project now uses both:
+- Create task with title, Jira key, and description
+- Search, status filters, Jira-only filter, and sorting
+- Inline edit for title/Jira/description + optional status note
+- Quick status-note logging
+- Status history timeline per task
+- Bulk actions: `Mark All Open Done`, `Clear Completed`
+- Jira base URL setting persisted in local storage
 
-- GraphQL (AppSync + Amplify Data) for list/create/toggle/delete
-- REST (Amplify-provisioned API Gateway + Lambda) for edit
-
-After backend changes, re-run:
-
-```bash
-cd ..
-npx ampx sandbox
-```
-
-Then sync outputs again in this app:
+## Validation Commands
 
 ```bash
-npm run sync:amplify
+npm run lint
+npm run build
 ```

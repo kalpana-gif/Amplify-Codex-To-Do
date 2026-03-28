@@ -1,9 +1,9 @@
 # Developer KT Guidebook: Next.js + Amplify Jira Todo
 
-This KT document is aligned with the current project implementation (March 28, 2026).
+This KT document is aligned with the current project implementation (March 29, 2026).
 
 - Frontend: Next.js app in `next-amplify-crud`
-- Backend: Amplify Gen 2 project in `../amplify`
+- Backend: Amplify Gen 2 project in `../amplify` (with mirrored schema files in `next-amplify-crud/amplify` for local typing)
 - API style: GraphQL and REST together
 
 ## 1) What This App Does Now
@@ -26,6 +26,7 @@ This KT document is aligned with the current project implementation (March 28, 2
 | 7 | `npm run lint` | Static quality check before handoff. |
 | 8 | `npm run build` | Production build verification. |
 | 9 | `npx tsc -p ../amplify/tsconfig.json --noEmit` | Validate backend TypeScript definitions and Lambda/backend code compile state. |
+| 10 | `npx tsc -p amplify/tsconfig.json --noEmit` | Validate mirrored local Amplify schema types used by frontend imports. |
 
 ## 3) Backend Files and Why They Exist
 
@@ -35,6 +36,7 @@ This KT document is aligned with the current project implementation (March 28, 2
 | `../amplify/backend.ts` | Composes backend resources and provisions REST API routes via API Gateway + Lambda integration. |
 | `../amplify/functions/rest-todo/resource.ts` | Declares Lambda function resource metadata. |
 | `../amplify/functions/rest-todo/handler.ts` | REST handler that bridges API requests to AppSync and appends status logs. |
+| `./amplify/data/resource.ts` | Mirrored schema file imported for frontend TypeScript `Schema` typing. |
 
 ## 4) Frontend Files and Why They Exist
 
@@ -55,7 +57,9 @@ This KT document is aligned with the current project implementation (March 28, 2
 | Edit todo | REST `PATCH /todos/:id` | same as above |
 | Toggle status | REST `PATCH /todos/:id` with `isDone` | same as above |
 | Add status note | REST `PATCH /todos/:id` with `statusNote` | same as above |
+| Mark all open done | REST `PATCH /todos/:id` per open todo (parallel) | `src/app/page.tsx` |
 | Delete todo | GraphQL `Todo.delete()` | `src/app/page.tsx` |
+| Clear completed | GraphQL `Todo.delete()` per completed todo (parallel) | `src/app/page.tsx` |
 
 Why split this way:
 - Demonstrates both GraphQL and REST in one app for demo.
@@ -78,6 +82,9 @@ Why split this way:
 - Can toggle open/done and see status history entry appended.
 - Can add quick status note and see history entry appended.
 - Can edit title/Jira/description without regression.
+- Can run bulk actions:
+  - Mark all open tasks as done.
+  - Clear completed tasks.
 - Jira link opens using configured Jira base URL.
 - Build and lint pass.
 
@@ -96,6 +103,10 @@ Why split this way:
 ### Symptom: UI works but status logs not updating
 - Cause: PATCH not reaching REST path or fallback route mismatch.
 - Fix: verify `src/app/api/todos/[id]/route.ts` and `../amplify/functions/rest-todo/handler.ts` are aligned.
+
+### Symptom: Backend schema change compiles in one folder but not another
+- Cause: `../amplify` and `next-amplify-crud/amplify` drifted.
+- Fix: align both backend definition folders, then re-run sandbox and sync outputs.
 
 ## 9) Suggested Prompt Pack (For Rebuilding)
 

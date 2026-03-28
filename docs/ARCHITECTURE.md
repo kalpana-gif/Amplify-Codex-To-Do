@@ -1,9 +1,9 @@
 # Next + Amplify Jira Todo Architecture (Developer Design Document)
 
-This document reflects the current implementation in this repository as of March 28, 2026.
+This document reflects the current implementation in this repository as of March 29, 2026.
 
 - Frontend: `next-amplify-crud` (Next.js 16 + React 19)
-- Backend definitions: `../amplify` (Amplify Gen 2)
+- Backend definitions: `../amplify` (sandbox deploy source), mirrored in `next-amplify-crud/amplify` for local schema typing
 - Runtime bridge: `amplify_outputs.json`
 
 ## 1) System Context
@@ -42,6 +42,7 @@ flowchart TB
       P4["src/app/layout.tsx\nGlobal font + metadata"]
       P5["src/app/globals.css\nTheme + reusable surface classes"]
       P6["amplify_outputs.json\nData API + custom REST endpoint"]
+      P7["amplify/data/resource.ts\nLocal schema type mirror"]
     end
 
     subgraph Backend["../amplify"]
@@ -52,6 +53,8 @@ flowchart TB
 
     P1 --> P3
     P1 --> P2
+    P1 -.type imports.-> P7
+    P2 -.type imports.-> P7
     P3 --> P6
     B2 --> B1
     B2 --> B3
@@ -86,6 +89,8 @@ Model source of truth: `../amplify/data/resource.ts`.
 | Toggle done/open | REST `PATCH /todos/:id` with `isDone` | Next route fallback | Enables automatic status history entries for state transitions. |
 | Add quick status note | REST `PATCH /todos/:id` with `statusNote` | Next route fallback | Lightweight operational logging without editing full task. |
 | Delete task | GraphQL `Todo.delete()` | N/A | Straightforward delete path via generated client. |
+| Mark all open as done | REST `PATCH /todos/:id` in parallel | Next route fallback per item | Reuses the same status-change logging contract for each task. |
+| Clear completed | GraphQL `Todo.delete()` in parallel | N/A | Fast bulk cleanup of completed items. |
 
 ## 5) Runtime Sequence (Edit/Toggle/Note)
 
@@ -119,7 +124,7 @@ sequenceDiagram
 - Warm layered background (`app-shell`) for contrast without dark-mode dependency.
 - Glass-like surfaces (`glass-panel`, `glass-panel-strong`) to separate board and side panel.
 - State color language:
-  - Open: amber
+  - Open: slate
   - Done: emerald
   - Jira links: sky
 
@@ -131,9 +136,9 @@ sequenceDiagram
 - Expandable status history timeline per task.
 
 ### 6.3 Interaction Guarantees
-- No destructive bulk operations.
+- Bulk actions are explicit and button-driven (`Mark All Open Done`, `Clear Completed`).
 - PATCH operations preserve existing behavior and append logs.
-- Explicit loading/disabled states for create/edit/toggle/log/delete.
+- Explicit loading/disabled states for create/edit/toggle/log/delete and bulk actions.
 
 ## 7) Security and Auth
 
@@ -156,6 +161,6 @@ flowchart TD
 
 ## 9) Current Tradeoffs and Next Evolution
 
-- List/delete remain GraphQL while edit/toggle/note use REST; this hybrid is intentional for demoing both patterns.
+- List/delete/clear-completed remain GraphQL while create/edit/toggle/note and mark-all-done use REST; this hybrid is intentional for demoing both patterns.
 - UI still refreshes with full `Todo.list()` after each mutation (correctness over minimal reads).
 - `statusLogs` is plain string array for speed; future improvement can move to structured log model (`TodoStatusEvent`) for analytics.
